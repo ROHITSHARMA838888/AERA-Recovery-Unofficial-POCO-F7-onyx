@@ -1,8 +1,8 @@
 <div align="center">
 
-# A E R A
+<img src="assets/readme/onyx-banner.svg" alt="AERA Recovery for onyx — unofficial port in development" width="100%">
 
-### Recovery, brought to onyx.
+### The AERA experience. A new home on onyx.
 
 **POCO F7 · Redmi Turbo 4 Pro**
 
@@ -12,7 +12,7 @@ The upstream AERA experience, adapted for our hardware.
 ![Device](https://img.shields.io/badge/DEVICE-ONYX-22D3EE?style=for-the-badge)
 ![Development](https://img.shields.io/badge/STATUS-EARLY_DEVELOPMENT-F59E0B?style=for-the-badge)
 
-[Status](#project-status) · [Features](#the-feature-target) · [Roadmap](#development-roadmap) · [Building](#building) · [Credits](#credits)
+[Screenshots](#a-look-inside-aera) · [Status](#project-status) · [Features](#the-feature-target) · [Roadmap](#development-roadmap) · [Building](#building) · [Credits](#credits)
 
 ---
 
@@ -29,6 +29,31 @@ The upstream AERA experience, adapted for our hardware.
 An **unofficial port of [AERA Recovery](https://aera-recovery.com/)** for **POCO F7 / Redmi Turbo 4 Pro**, codename **onyx**. We intend to preserve upstream AERA's interface, design and shared functionality while adapting the device tree, drivers and services for this phone.
 
 The goal is a general-purpose recovery for compatible onyx ROMs. The ROM installed on our test device provides hardware evidence; it does not define an exclusive ROM requirement. ROM installation and encrypted-storage decryption need separate compatibility tests. Future ROM changes can require recovery updates.
+
+## A look inside AERA
+
+<div align="center">
+
+### Native recovery. Connected workspace.
+
+<table>
+<tr>
+<td align="center" width="50%"><strong>THE AERA HOME</strong><br><br><img src="https://aera-recovery.com/assets/screen-home-20261011.webp" alt="Official upstream AERA home screenshot" width="290"></td>
+<td align="center" width="50%"><strong>NETWORK &amp; CONNECTIVITY</strong><br><br><img src="https://aera-recovery.com/assets/screen-network-20261021-redacted.png" alt="Official upstream AERA network screenshot with Wi-Fi and mobile-data controls" width="290"></td>
+</tr>
+</table>
+
+### A bigger view of your recovery
+
+<img src="https://aera-recovery.com/assets/screen-pc-connection.png" alt="Official upstream AERA PC Connection browser workspace" width="940">
+
+**PC CONNECTION** · Upstream browser workspace
+
+</div>
+
+> **Upstream reference screenshots — not POCO F7 test results.** Images are linked directly from the [official AERA website](https://aera-recovery.com/features). They illustrate AERA's appearance and belong to their respective owners. They do not establish that these features work on this port. External images may change or become unavailable.
+
+---
 
 ## Project status
 
