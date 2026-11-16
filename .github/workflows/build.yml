@@ -1,0 +1,56 @@
+name: AERA onyx development build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aera-onyx-build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    env:
+      AERA_BUILD_DEVICE: onyx
+      MANIFEST_REVISION: aabd43b2478f3e6dcd0330e7cd5839746c0bf9a7
+      BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - name: Prepare disposable Linux runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Fixed preinstalled SDK directories, only on this disposable hosted VM.
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup /usr/local/share/boost /opt/hostedtoolcache/CodeQL
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf lib32ncurses-dev lib32z1-dev libelf-dev liblz4-tool libncurses-dev libsdl1.2-dev libssl-dev libxml2-utils lzop python3 python3-pip rsync unzip x11proto-core-dev xsltproc zip zlib1g-dev
+          mkdir -p "$HOME/.local/bin" "$GITHUB_WORKSPACE/build-evidence"
+          curl --fail --location --retry 3 https://storage.googleapis.com/git-repo-downloads/repo -o "$HOME/.local/bin/repo"
+          chmod +x "$HOME/.local/bin/repo"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          git config --global user.name 'AERA onyx CI'
+          git config --global user.email 'aera-onyx-ci@users.noreply.github.com'
+          df -h | tee build-evidence/disk-before.txt
+          free -h | tee build-evidence/memory.txt
+          available=$(df --output=avail -BG "$RUNNER_TEMP" | tail -1 | tr -dc '0-9')
+          if (( available < 60 )); then
+            echo "Insufficient space: ${available} GiB available; need at least 60 GiB for the first attempt." >&2
+            exit 1
+          fi
+      - name: Sync and compile AERA
+        shell: bash
+        run: bash ci/build.sh "$RUNNER_TEMP/aera-source"
+      - name: Save build evidence and development artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: aera-onyx-development-${{ github.run_id }}
+          path: build-evidence/
+          if-no-files-found: warn
+          retention-days: 7

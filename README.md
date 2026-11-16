@@ -64,7 +64,7 @@ The goal is a general-purpose recovery for compatible onyx ROMs. The ROM install
 | Initial AERA device-tree adaptation | Draft prepared |
 | Original source history and credits | Retained |
 | Hardware dependency integration | Pending |
-| GitHub Actions workflow | Not added yet |
+| GitHub Actions workflow | Added; first development run pending |
 | Successful compilation | Not completed |
 | Boot test on onyx | Not performed |
 | Verified working features | None yet |
@@ -123,7 +123,8 @@ These are initial observations, not a compatibility guarantee for every firmware
 - [ ] Review inherited build flags, fstab, crypto sequencing and module ABI.
 - [ ] Integrate onyx graphics, audio, Wi-Fi and cellular dependencies.
 - [ ] Resolve runtime-package availability and redistribution requirements.
-- [ ] Add and validate a Linux GitHub Actions workflow.
+- [x] Add a Linux GitHub Actions development workflow.
+- [ ] Complete its first successful build.
 - [ ] Compile and inspect the first complete recovery image.
 - [ ] Validate boot, touch, storage, USB and decryption.
 - [ ] Validate flashing, backup/restore, networking, media and plugins.
@@ -150,12 +151,12 @@ The `twrp_` product prefix is inherited build plumbing. The intended interface i
 
 ## Building
 
-**There is no validated build recipe or Actions workflow yet.** The intended approach is:
+The manual **AERA onyx development build** workflow is available under Actions. Its first successful build and artifact validation are still pending. The workflow:
 
 1. Sync the upstream [AERA Android 16 manifest](https://github.com/AERA-Recovery/android_manifest).
 2. Integrate this device tree at `device/xiaomi/onyx`.
 3. Finish dependency integration and validate the product configuration.
-4. Pin source revisions and compile on a Linux GitHub Actions runner with adequate resources.
+4. Uses a pinned manifest revision, records resolved dependency revisions and attempts compilation on a Linux GitHub Actions runner.
 5. Inspect the output before any device testing.
 
 The draft registers `twrp_onyx-bp2a-eng`; that registration does not prove that it builds. No generic flashing command is provided until the image and installation path have been validated.

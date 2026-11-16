@@ -23,9 +23,9 @@ PRODUCT_MANUFACTURER := Xiaomi
 TARGET_OTA_ASSERT_DEVICE := onyx
 
 # Theme
-TW_STATUS_ICONS_ALIGN := center
+# Native AERA layout is adaptive.
 #TW_Y_OFFSET := 99
 #TW_H_OFFSET := -99
 
 # Strongbox Device Decryption
-TW_INCLUDE_OMAPI := true
+AERA_INCLUDE_OMAPI := true

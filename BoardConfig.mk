@@ -89,11 +89,7 @@ AB_OTA_PARTITIONS += \
 # Verified Boot
 BOARD_AVB_ENABLE := true
 
-# Auto-disable AVB2 verification after ROM flash
-# Without this, ROM writes fresh vbmeta with verification ON,
-# but DFE modifies vendor_boot → verified boot fails → fastboot!
-# NOTE: orangefox.mk checks `ifeq ($(OF_SUPPORT_VBMETA_AVB2_PATCHING),1)` — must be 1!
-OF_SUPPORT_VBMETA_AVB2_PATCHING := 1
+# AVB handling stays with upstream AERA; do not inherit Fox-specific DFE hooks.
 
 # Partitions
 BOARD_RECOVERYIMAGE_PARTITION_SIZE := 104857600
@@ -125,11 +121,11 @@ TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 
 # Crypto
 FIXED_DECRYPT := true
-TW_INCLUDE_CRYPTO := $(FIXED_DECRYPT)
-TW_INCLUDE_CRYPTO_FBE := $(FIXED_DECRYPT)
-TW_INCLUDE_FBE_METADATA_DECRYPT := $(FIXED_DECRYPT)
+AERA_INCLUDE_CRYPTO := $(FIXED_DECRYPT)
+AERA_INCLUDE_CRYPTO_FBE := $(FIXED_DECRYPT)
+AERA_INCLUDE_FBE_METADATA_DECRYPT := $(FIXED_DECRYPT)
 BOARD_USES_QCOM_FBE_DECRYPTION := $(FIXED_DECRYPT)
-TW_USE_FSCRYPT_POLICY := 2
+AERA_USE_FSCRYPT_POLICY := 2
 
 BOARD_USES_METADATA_PARTITION := true
 PLATFORM_VERSION := 99.87.36
@@ -142,56 +138,58 @@ BOOT_SECURITY_PATCH     := $(PLATFORM_SECURITY_PATCH)
 TARGET_BOARD_INFO_FILE := $(DEVICE_PATH)/board-info.txt
 
 # Tool
-TW_INCLUDE_REPACKTOOLS := true
-TW_INCLUDE_RESETPROP := true
-TW_INCLUDE_LIBRESETPROP := true
-TW_INCLUDE_LPDUMP := true
-TW_INCLUDE_LPTOOLS := true
+AERA_INCLUDE_REPACKTOOLS := true
+AERA_INCLUDE_RESETPROP := true
+AERA_INCLUDE_LIBRESETPROP := true
+AERA_INCLUDE_LPDUMP := true
+AERA_INCLUDE_LPTOOLS := true
 
 # Debug
 TARGET_USES_LOGD := true
-TWRP_INCLUDE_LOGCAT := true
+AERA_INCLUDE_LOGCAT := true
 TARGET_RECOVERY_DEVICE_MODULES += strace
 RECOVERY_BINARY_SOURCE_FILES   += $(TARGET_OUT_EXECUTABLES)/strace
 
 # Fastbootd
-TW_INCLUDE_FASTBOOTD := true
+AERA_INCLUDE_FASTBOOTD := true
 
 # Other TWRP Configurations
-TW_THEME := portrait_hdpi
-TW_FRAMERATE := 120
+AERA_THEME := portrait_hdpi
+AERA_UI_ADAPTIVE_RESOLUTION := true
+AERA_ROOT_MODULE_KERNELS := 6.6
+AERA_FRAMERATE := 120
 RECOVERY_SDCARD_ON_DATA := true
 TARGET_RECOVERY_QCOM_RTC_FIX := true
-TW_EXCLUDE_DEFAULT_USB_INIT := true
-TW_INCLUDE_NTFS_3G := true
-TW_NO_EXFAT_FUSE := false
-TW_USE_TOOLBOX := true
+AERA_EXCLUDE_DEFAULT_USB_INIT := true
+AERA_INCLUDE_NTFS_3G := true
+AERA_NO_EXFAT_FUSE := false
+AERA_USE_TOOLBOX := true
 TARGET_USES_MKE2FS := true
-TW_INPUT_BLACKLIST := "hbtp_vm"
-TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
-TW_MAX_BRIGHTNESS := 2047
-TW_EXTRA_LANGUAGES := false
-TW_DEFAULT_LANGUAGE := en
-TW_DEFAULT_BRIGHTNESS := 200
-TW_NO_SCREEN_BLANK := true
-TW_EXCLUDE_APEX := true
-TW_HAS_EDL_MODE := true
+AERA_INPUT_BLACKLIST := "hbtp_vm"
+AERA_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
+AERA_MAX_BRIGHTNESS := 2047
+# AERA native localization is provided by upstream.
+# Native default locale follows upstream AERA.
+AERA_DEFAULT_BRIGHTNESS := 200
+AERA_NO_SCREEN_BLANK := true
+AERA_EXCLUDE_APEX := true
+AERA_HAS_EDL_MODE := true
 
 # Haptic
 FIXED_HAPTICS := true
 
 ifeq ($(FIXED_HAPTICS),true)
-   TW_SUPPORT_INPUT_AIDL_HAPTICS := true
-   TW_SUPPORT_INPUT_AIDL_HAPTICS_FQNAME := "IVibrator/vibratorfeature"
-   TW_SUPPORT_INPUT_AIDL_HAPTICS_FIX_OFF := true
+   AERA_SUPPORT_INPUT_AIDL_HAPTICS := true
+   AERA_SUPPORT_INPUT_AIDL_HAPTICS_FQNAME := "IVibrator/vibratorfeature"
+   # Legacy haptic workaround has no public AERA mapping; review during bring-up.
 else
-   TW_NO_HAPTICS := true
+   AERA_NO_HAPTICS := true
 endif
 
-TW_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID := true
-TW_LOAD_VENDOR_MODULES := "adsp_loader_dlkm.ko nt38771_touch.ko nxp-nci.ko xiaomi_touch.ko phy-msm-m31-eusb2.ko phy-msm-snps-eusb2.ko phy-msm-ssusb-qmp.ko repeater-qti-pmic-eusb2.ko wcd_usbss_i2c.ko dwc3-msm.ko xhci-sideband.ko repeater.ko phy-generic.ko"
-TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
-TW_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone48/temp"
-TW_BATTERY_SYSFS_WAIT_SECONDS := 6
-TW_VIRTUAL_AB_COMPRESSION := true
-TW_INCLUDE_LIBRESETPROP := true
+AERA_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID := true
+AERA_LOAD_VENDOR_MODULES := "adsp_loader_dlkm.ko nt38771_touch.ko nxp-nci.ko xiaomi_touch.ko phy-msm-m31-eusb2.ko phy-msm-snps-eusb2.ko phy-msm-ssusb-qmp.ko repeater-qti-pmic-eusb2.ko wcd_usbss_i2c.ko dwc3-msm.ko xhci-sideband.ko repeater.ko phy-generic.ko"
+AERA_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
+AERA_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone48/temp"
+AERA_BATTERY_SYSFS_WAIT_SECONDS := 6
+# Virtual A/B support is selected in the product configuration.
+AERA_INCLUDE_LIBRESETPROP := true
