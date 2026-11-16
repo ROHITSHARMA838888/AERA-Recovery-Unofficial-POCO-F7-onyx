@@ -11,6 +11,8 @@ printf 'Device tree: %s\n' "$(git rev-parse HEAD)" | tee "$evidence/device-revis
 printf '%s\n' 'DEVELOPMENT BUILD ONLY. NOT BOOT-TESTED. NO WORKING FEATURE CLAIMS.' > "$evidence/STATUS.txt"
 cd "$source_root"
 repo init -u https://github.com/AERA-Recovery/android_manifest.git -b "$MANIFEST_REVISION" --depth=1 --no-clone-bundle
+mkdir -p .repo/local_manifests
+cp "$device_checkout/ci/local-manifest.xml" .repo/local_manifests/onyx.xml
 repo sync -c --no-clone-bundle --no-tags --fail-fast -j4
 repo manifest -r -o "$evidence/resolved-manifest.xml"
 mkdir -p device/xiaomi

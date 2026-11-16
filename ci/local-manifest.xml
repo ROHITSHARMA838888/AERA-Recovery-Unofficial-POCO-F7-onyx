@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <!-- Onyx bootctrl modules import defaults from this namespace. -->
+  <remote name="onyx-lineage" fetch="https://github.com/LineageOS/" />
+  <project path="hardware/qcom-caf/bootctrl"
+           name="android_hardware_qcom_bootctrl"
+           remote="onyx-lineage"
+           revision="4f73a952a68dd7fb0024173f3f24275e3d567151" />
+</manifest>
