@@ -6,7 +6,24 @@ source_root=${1:?Usage: ci/build.sh SOURCE_ROOT}
 evidence="$device_checkout/build-evidence"
 mkdir -p "$evidence" "$source_root"
 exec > >(tee "$evidence/build.log") 2>&1
-trap 'result=$?; df -h > "$evidence/disk-final.txt"; printf "%s\n" "$result" > "$evidence/exit-code.txt"' EXIT
+cleanup() {
+  result=$?
+  if [[ -n ${resource_pid:-} ]]; then kill "$resource_pid" 2>/dev/null || true; fi
+  df -h > "$evidence/disk-final.txt"
+  free -h > "$evidence/memory-final.txt"
+  printf '%s\n' "$result" > "$evidence/exit-code.txt"
+}
+trap cleanup EXIT
+# Persist resource snapshots on the runner; no external status polling required.
+(
+  while true; do
+    date -u
+    free -m
+    df -h "$source_root"
+    sleep 60
+  done
+) >> "$evidence/resources.log" 2>&1 &
+resource_pid=$!
 printf 'Device tree: %s\n' "$(git rev-parse HEAD)" | tee "$evidence/device-revision.txt"
 printf '%s\n' 'DEVELOPMENT BUILD ONLY. NOT BOOT-TESTED. NO WORKING FEATURE CLAIMS.' > "$evidence/STATUS.txt"
 cd "$source_root"

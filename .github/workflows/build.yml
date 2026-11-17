@@ -17,7 +17,7 @@ jobs:
     env:
       AERA_BUILD_DEVICE: onyx
       MANIFEST_REVISION: aabd43b2478f3e6dcd0330e7cd5839746c0bf9a7
-      BUILD_JOBS: '2'
+      BUILD_JOBS: '1'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -43,6 +43,14 @@ jobs:
             echo "Insufficient space: ${available} GiB available; need at least 60 GiB for the first attempt." >&2
             exit 1
           fi
+          # Keep the runner responsive during Soong's memory-heavy analysis.
+          sudo fallocate -l 12G /aera-build.swap
+          sudo chmod 600 /aera-build.swap
+          sudo mkswap /aera-build.swap
+          sudo swapon /aera-build.swap
+          sudo sysctl vm.swappiness=60
+          swapon --show | tee build-evidence/swap.txt
+          free -h | tee build-evidence/memory-with-swap.txt
       - name: Sync and compile AERA
         shell: bash
         run: bash ci/build.sh "$RUNNER_TEMP/aera-source"
