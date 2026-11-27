@@ -191,6 +191,10 @@ endif
 AERA_USE_SERIALNO_PROPERTY_FOR_DEVICE_ID := true
 AERA_LOAD_VENDOR_MODULES := "adsp_loader_dlkm.ko nt38771_touch.ko nxp-nci.ko xiaomi_touch.ko phy-msm-m31-eusb2.ko phy-msm-snps-eusb2.ko phy-msm-ssusb-qmp.ko repeater-qti-pmic-eusb2.ko wcd_usbss_i2c.ko dwc3-msm.ko xhci-sideband.ko repeater.ko phy-generic.ko"
 AERA_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
+
+# Stage the running ROM's Onyx WLAN modules until userdata is ready.
+AERA_ENABLE_WLAN := 1
+AERA_POST_DECRYPT_MODULES := "smem-mailbox.ko rfkill.ko cfg80211.ko cnss_prealloc.ko cnss_utils.ko cnss_nl.ko wlan_firmware_service.ko icnss2.ko qca_cld3_wcn7750.ko"
 AERA_CUSTOM_CPU_TEMP_PATH := "/sys/class/thermal/thermal_zone48/temp"
 AERA_BATTERY_SYSFS_WAIT_SECONDS := 6
 # Virtual A/B support is selected in the product configuration.
