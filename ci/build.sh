@@ -32,6 +32,7 @@ mkdir -p .repo/local_manifests
 cp "$device_checkout/ci/local-manifest.xml" .repo/local_manifests/onyx.xml
 repo sync -c --no-clone-bundle --no-tags --fail-fast -j4
 repo manifest -r -o "$evidence/resolved-manifest.xml"
+git -C bootable/recovery apply "$device_checkout/ci/patches/aera-network-checks.patch"
 mkdir -p device/xiaomi
 git clone --no-hardlinks "$device_checkout" device/xiaomi/onyx
 export AERA_BUILD_DEVICE=onyx

@@ -1,0 +1,100 @@
+diff --git a/aeraui/features/plugins/plugin_manager.cpp b/aeraui/features/plugins/plugin_manager.cpp
+index 79a5709..10e4410 100644
+--- a/aeraui/features/plugins/plugin_manager.cpp
++++ b/aeraui/features/plugins/plugin_manager.cpp
+@@ -418,10 +418,11 @@ bool ParseCatalog(const std::string &text, std::vector<Plugin> &plugins,
+ 
+ bool Download(const std::string &url, const std::string &path, uint64_t limit,
+               Progress *progress = nullptr, unsigned progress_start = 0,
+-              unsigned progress_end = 0, uint64_t expected_size = 0) {
++              unsigned progress_end = 0, uint64_t expected_size = 0,
++              transport::DownloadPolicy policy = {}) {
+   if (!OfficialUrl(url) || limit == 0 || limit > kMaxPayload) return false;
+   return transport::Download(url, path, limit, progress, progress_start,
+-                             progress_end, expected_size);
++                             progress_end, expected_size, policy);
+ }
+ 
+ bool HashFile(const std::string &path, uint64_t expected_size,
+@@ -733,12 +734,15 @@ bool Refresh(Progress &progress) {
+   const std::string manifest = std::string(kCacheRoot) + "/catalog.json.new";
+   const std::string signature = manifest + ".sig";
+   progress.status = "Downloading signed catalog"; progress.value.store(10);
+-  if (!Download(kCatalogUrl, manifest, kMaxCatalog, &progress)) {
++  const transport::DownloadPolicy catalog_policy{std::chrono::seconds(15), 2};
++  if (!Download(kCatalogUrl, manifest, kMaxCatalog, &progress, 0, 0, 0,
++                catalog_policy)) {
+     unlink(manifest.c_str()); unlink(signature.c_str());
+     progress.error = "Could not download the AERA plugin catalog."; return false;
+   }
+   progress.value.store(45);
+-  if (!Download(kCatalogSignatureUrl, signature, kMaxSignature, &progress)) {
++  if (!Download(kCatalogSignatureUrl, signature, kMaxSignature, &progress,
++                0, 0, 0, catalog_policy)) {
+     unlink(manifest.c_str()); unlink(signature.c_str());
+     progress.error = "Could not download the AERA plugin catalog."; return false;
+   }
+diff --git a/wlan.cpp b/wlan.cpp
+index 933a946..545c368 100644
+--- a/wlan.cpp
++++ b/wlan.cpp
+@@ -1,6 +1,9 @@
+ #include "wlan.hpp"
+ 
+ #include <arpa/inet.h>
++#include <netdb.h>
++#include <poll.h>
++#include <sys/socket.h>
+ #include <cctype>
+ #include <cstdint>
+ #include <cerrno>
+@@ -1035,18 +1038,39 @@ bool Wlan::TestConnection()
+         return true;
+     }
+ 
+-    std::string busybox = GetBusyboxBinary();
+-    if (busybox.empty())
+-        busybox = "busybox";
+-
+-    std::string internet_output;
+-    bool internet_ok = RunCommand(busybox + " ping -c 1 -w 4 1.1.1.1 2>&1", internet_output);
++    // ICMP can be blocked even when regular traffic and DNS work in recovery.
++    sockaddr_in endpoint{};
++    endpoint.sin_family = AF_INET;
++    endpoint.sin_port = htons(443);
++    inet_pton(AF_INET, "1.1.1.1", &endpoint.sin_addr);
++
++    const int fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC | SOCK_NONBLOCK, 0);
++    bool internet_ok = false;
++    if (fd >= 0) {
++        const int result = connect(fd, reinterpret_cast<const sockaddr*>(&endpoint), sizeof(endpoint));
++        internet_ok = result == 0;
++        if (result < 0 && errno == EINPROGRESS) {
++            pollfd ready{fd, POLLOUT, 0};
++            int error = 0;
++            socklen_t error_size = sizeof(error);
++            internet_ok = poll(&ready, 1, 4000) > 0 &&
++                getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &error_size) == 0 &&
++                error == 0;
++        }
++        close(fd);
++    }
+ 
+-    std::string dns_output;
+-    bool dns_ok = RunCommand(busybox + " ping -c 1 -w 4 bing.com 2>&1", dns_output);
++    addrinfo hints{};
++    hints.ai_family = AF_INET;
++    hints.ai_socktype = SOCK_STREAM;
++    addrinfo* addresses = nullptr;
++    const int dns_result = getaddrinfo("example.com", nullptr, &hints, &addresses);
++    const bool dns_ok = dns_result == 0 && addresses != nullptr;
++    if (addresses != nullptr)
++        freeaddrinfo(addresses);
+ 
+-    LOGINFO("WLAN test internet output:\n%s\n", internet_output.c_str());
+-    LOGINFO("WLAN test DNS output:\n%s\n", dns_output.c_str());
++    LOGINFO("WLAN test TCP connection: %s\n", internet_ok ? "OK" : "failed");
++    LOGINFO("WLAN test DNS lookup: %s\n", dns_ok ? "OK" : gai_strerror(dns_result));
+ 
+     if (internet_ok && dns_ok) {
+         SetWlanTestResult(
