@@ -192,7 +192,7 @@ Include the source commit, firmware/ROM version, exact steps, expected behavior 
 | [OnePlus 15 AERA tree](https://github.com/AERA-Recovery/android_device_oneplus_infiniti-AERA) | Additional cellular reference |
 | [TeamWin](https://github.com/TeamWin), [OrangeFox](https://gitlab.com/OrangeFox), [AOSP](https://source.android.com/) | Recovery foundations and original contributors |
 
-Unofficial port maintained in [ROHITSHARMA838888's repository](https://github.com/ROHITSHARMA838888/AERA-Recovery-Unofficial-POCO-F7-onyx). This project does not imply endorsement or official support from AERA or Xiaomi.
+**Unofficial POCO F7 (onyx) port maintainer:** Rohit Sharma (hcclubb). Development takes place in the [port repository](https://github.com/ROHITSHARMA838888/AERA-Recovery-Unofficial-POCO-F7-onyx). This project does not imply endorsement or official support from AERA or Xiaomi.
 
 ## Licensing
 

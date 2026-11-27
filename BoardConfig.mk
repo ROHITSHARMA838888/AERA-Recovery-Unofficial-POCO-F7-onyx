@@ -171,6 +171,8 @@ AERA_MAX_BRIGHTNESS := 2047
 # AERA native localization is provided by upstream.
 # Native default locale follows upstream AERA.
 AERA_DEFAULT_BRIGHTNESS := 200
+# Maintainer of the unofficial POCO F7 port.
+AERA_MAINTAINER := Rohit Sharma (hcclubb)
 AERA_NO_SCREEN_BLANK := true
 AERA_EXCLUDE_APEX := true
 AERA_HAS_EDL_MODE := true
