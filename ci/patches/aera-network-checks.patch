@@ -1,10 +1,13 @@
 diff --git a/aeraui/features/plugins/plugin_manager.cpp b/aeraui/features/plugins/plugin_manager.cpp
-index 79a5709..10e4410 100644
+index 79a5709..9dac1a5 100644
 --- a/aeraui/features/plugins/plugin_manager.cpp
 +++ b/aeraui/features/plugins/plugin_manager.cpp
-@@ -418,10 +418,11 @@ bool ParseCatalog(const std::string &text, std::vector<Plugin> &plugins,
+@@ -416,12 +416,13 @@ bool ParseCatalog(const std::string &text, std::vector<Plugin> &plugins,
+   return true;
+ }
  
- bool Download(const std::string &url, const std::string &path, uint64_t limit,
+-bool Download(const std::string &url, const std::string &path, uint64_t limit,
++bool DownloadOfficial(const std::string &url, const std::string &path, uint64_t limit,
                Progress *progress = nullptr, unsigned progress_start = 0,
 -              unsigned progress_end = 0, uint64_t expected_size = 0) {
 +              unsigned progress_end = 0, uint64_t expected_size = 0,
@@ -22,18 +25,59 @@ index 79a5709..10e4410 100644
    progress.status = "Downloading signed catalog"; progress.value.store(10);
 -  if (!Download(kCatalogUrl, manifest, kMaxCatalog, &progress)) {
 +  const transport::DownloadPolicy catalog_policy{std::chrono::seconds(15), 2};
-+  if (!Download(kCatalogUrl, manifest, kMaxCatalog, &progress, 0, 0, 0,
++  if (!DownloadOfficial(kCatalogUrl, manifest, kMaxCatalog, &progress, 0, 0, 0,
 +                catalog_policy)) {
      unlink(manifest.c_str()); unlink(signature.c_str());
      progress.error = "Could not download the AERA plugin catalog."; return false;
    }
    progress.value.store(45);
 -  if (!Download(kCatalogSignatureUrl, signature, kMaxSignature, &progress)) {
-+  if (!Download(kCatalogSignatureUrl, signature, kMaxSignature, &progress,
++  if (!DownloadOfficial(kCatalogSignatureUrl, signature, kMaxSignature, &progress,
 +                0, 0, 0, catalog_policy)) {
      unlink(manifest.c_str()); unlink(signature.c_str());
      progress.error = "Could not download the AERA plugin catalog."; return false;
    }
+@@ -793,7 +797,7 @@ bool Install(const std::string &id, Location location, Progress &progress) {
+     const std::string package = std::string(kCacheRoot) + "/" + id + ".aerap";
+     progress.status = "Downloading " + source.name;
+     progress.value.store(5);
+-    if (!Download(source.package_url, package, source.package_size, &progress,
++    if (!DownloadOfficial(source.package_url, package, source.package_size, &progress,
+                   5, 68, source.package_size)) {
+       unlink(package.c_str());
+       progress.error = "Plugin package download failed.";
+@@ -832,11 +836,11 @@ bool Install(const std::string &id, Location location, Progress &progress) {
+   const std::string manifest_path = staging + "/plugin.json";
+   const std::string signature_path = staging + "/plugin.json.sig";
+   progress.status = "Downloading signed manifest"; progress.value.store(5);
+-  if (!Download(source.manifest_url, manifest_path, kMaxManifest, &progress)) {
++  if (!DownloadOfficial(source.manifest_url, manifest_path, kMaxManifest, &progress)) {
+     RemoveTree(staging); progress.error = "Could not download the plugin manifest."; return false;
+   }
+   progress.value.store(10);
+-  if (!Download(source.signature_url, signature_path, kMaxSignature, &progress)) {
++  if (!DownloadOfficial(source.signature_url, signature_path, kMaxSignature, &progress)) {
+     RemoveTree(staging); progress.error = "Could not download the plugin manifest."; return false;
+   }
+   progress.value.store(15);
+@@ -852,7 +856,7 @@ bool Install(const std::string &id, Location location, Progress &progress) {
+   }
+   progress.status = "Downloading " + plugin.name; progress.value.store(20);
+   const std::string payload = staging + "/" + plugin.payload_name;
+-  if (!Download(plugin.payload_url, payload, plugin.payload_size,
++  if (!DownloadOfficial(plugin.payload_url, payload, plugin.payload_size,
+                 &progress, 20, 78, plugin.payload_size)) {
+     RemoveTree(staging); progress.error = "Plugin payload download failed."; return false;
+   }
+@@ -1037,7 +1041,7 @@ static bool RunImpl(const Request &request, Progress &progress) {
+       std::string cached;
+       constexpr uint64_t limit = 4 * 1024 * 1024;
+       if (!ReadBounded(path, limit, cached) || cached.empty()) {
+-        if (!Download(url, path + ".new", limit, &progress, 5, 95) ||
++        if (!DownloadOfficial(url, path + ".new", limit, &progress, 5, 95) ||
+             rename((path + ".new").c_str(), path.c_str()) != 0) {
+           unlink((path + ".new").c_str());
+           progress.error = "Screenshot unavailable.";
 diff --git a/wlan.cpp b/wlan.cpp
 index 933a946..545c368 100644
 --- a/wlan.cpp
