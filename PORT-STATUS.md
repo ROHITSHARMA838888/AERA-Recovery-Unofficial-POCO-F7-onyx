@@ -1,5 +1,12 @@
 # Onyx developer handoff
 
+## Where r6 was built and tested
+
+- **Build host:** ServerHive Linux VPS, using an existing synced AERA checkout and incremental `recoveryimage` build. The release IMG, installer ZIP and checksums came from that run.
+- **Phone test:** POCO F7 (`onyx`), recovery slot B, Yasvara ROM and Drago `6.12.119-ge20f6b96dbcc`. See the table below for feature results.
+- **Still to verify:** A full build from a fresh Linux checkout using the published instructions, and the GitHub Actions workflow at this release revision. The upstream Android source is fetched by `repo` at the documented revisions. No access to the original VPS is required to attempt the build.
+- **First developer check:** Build from the release tag using the pinned manifest and Onyx patch. Confirm that it produces both the recovery IMG and installer ZIP, record their checksums, then test the new IMG on the documented phone setup if available.
+
 ## Build and source
 
 The device tree, build script, local manifest and Onyx-specific AERA patches are in this repository. The published r6 build uses the AERA Android 16 manifest at `aabd43b2478f3e6dcd0330e7cd5839746c0bf9a7` and AERA recovery core at `1cabc50919d2587ba986f679f946f52963130fc1`. The [resolved upstream manifest](ci/resolved-manifest.xml) records the dependency revisions. The [network patch](ci/patches/aera-network-checks.patch) contains the WLAN connection check and plugin downloader changes. Cellular code is in [mobile_data](mobile_data/) and uses the pinned AERA QRTR, RMTFS and TFTP projects. Preserve upstream licenses and attribution.
