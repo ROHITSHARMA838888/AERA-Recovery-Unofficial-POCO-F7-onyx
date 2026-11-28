@@ -1,0 +1,38 @@
+diff --git a/aeraui/features/browser/web_scene.cpp b/aeraui/features/browser/web_scene.cpp
+index d7e5353..babf871 100644
+--- a/aeraui/features/browser/web_scene.cpp
++++ b/aeraui/features/browser/web_scene.cpp
+@@ -88,6 +88,7 @@ void ShowBrowserStopped(WebScene *s) {
+                  "The persistent WebKit session closed unexpectedly.");
+   for (auto *control : s->controls)
+     lv_obj_add_state(control, LV_STATE_DISABLED);
++  lv_obj_remove_state(s->prepare, LV_STATE_DISABLED);
+ }
+ 
+ void DetachWebScene(WebScene *s) {
+@@ -603,6 +604,15 @@ void ShowBrowserSettings(WebScene *s) {
+ 
+ void Prepare(WebScene *s) {
+   HideKeyboard(s);
++  if (s->stopped && s->finished && s->state.verified) {
++    s->process.Stop();
++    s->session.Close();
++    s->stopped = false;
++    s->finished = false;
++    lv_obj_add_state(s->prepare, LV_STATE_DISABLED);
++    i18n::BindLabel(s->title, "Starting private browser");
++    return;
++  }
+   if (s->started) return;
+   if (!web::RuntimeInstalled()) {
+     i18n::BindLabel(s->title, "Browser package unavailable");
+@@ -1077,7 +1087,9 @@ void BuildWebScene(lv_obj_t *screen, ActionCallback callback, void *context,
+     if (!s->process.Start(s->state.directory, frame, control, error) ||
+         !s->session.Adopt(frame, control)) {
+       s->process.Stop();
++      s->stopped = true;
+       if (visible) {
++        lv_obj_remove_state(s->prepare, LV_STATE_DISABLED);
+         i18n::BindLabel(s->title, "Browser start failed");
+         i18n::BindLabel(s->detail,
+             error.empty() ? s->session.Status().c_str() : error.c_str());

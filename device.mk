@@ -43,3 +43,8 @@ PRODUCT_USE_DYNAMIC_PARTITIONS := true
 # Soong namespaces
 PRODUCT_SOONG_NAMESPACES += $(DEVICE_PATH)
 PRODUCT_PACKAGES += updater
+
+# Package the cellular provider only for the mobile-data build.
+ifeq ($(AERA_ENABLE_MOBILE_DATA),1)
+PRODUCT_PACKAGES += aera-cellular-provider
+endif
